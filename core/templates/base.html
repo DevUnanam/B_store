@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,35 @@
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 <body class="bg-gray-100">
-  <h1 class="text-3xl font-bold text-center mt-10">Storage Management System</h1>
-  {% block content %}{% endblock %}
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+    <a href="/" class="text-xl font-bold">Building Storage</a>
+    <div class="space-x-4">
+      <a href="/" class="text-gray-700">Home</a>
+
+      {% if user.is_authenticated %}
+        <!-- Occupants see Dashboard -->
+        <a href="{% url 'dashboard' %}" class="text-gray-700">Dashboard</a>
+
+        <!-- Admins see Manage Residents -->
+        {% if user.role == "admin" %}
+          <a href="{% url 'users:resident_list' %}" class="text-gray-700">Manage Residents</a>
+        {% endif %}
+        {% if user.role == "admin" %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'resident_archive' %}">Resident Archive</a>
+          </li>
+        {% endif %}
+
+        <a href="{% url 'logout' %}" class="text-red-600">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="bg-blue-600 text-white px-3 py-1 rounded">Login</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container mx-auto mt-8">
+    {% block content %}{% endblock %}
+  </main>
 </body>
 </html>

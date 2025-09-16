@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mt-20">
+  <h1 class="text-4xl font-bold">Welcome to the Building Storage System</h1>
+  <p class="mt-4 text-gray-600">Easily manage and request storage units in your apartment building.</p>
+  {% if not user.is_authenticated %}
+    <a href="{% url 'login' %}" class="mt-6 inline-block bg-blue-600 text-white px-4 py-2 rounded">Get Started</a>
+  {% endif %}
+</div>
+{% endblock %}

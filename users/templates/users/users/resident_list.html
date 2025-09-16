@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10 bg-white shadow rounded-lg p-6">
+  <h2 class="text-2xl font-bold mb-6">Resident Management</h2>
+
+  <table class="w-full border-collapse border border-gray-300">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="border border-gray-300 px-4 py-2 text-left">Name</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Apartment</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Email</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Phone</th>
+        <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+        <th class="border border-gray-300 px-4 py-2 text-center">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for resident in residents %}
+      <tr>
+        <td class="border border-gray-300 px-4 py-2">{{ resident.username }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ resident.apartment_number }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ resident.email }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ resident.phone }}</td>
+        <td class="border border-gray-300 px-4 py-2">
+          {% if resident.is_active %}
+            <span class="text-green-600 font-semibold">Active</span>
+          {% else %}
+            <span class="text-red-600 font-semibold">Inactive</span>
+          {% endif %}
+        </td>
+        <td class="border border-gray-300 px-4 py-2 text-center">
+          <a href="{% url 'users:toggle_resident_status' resident.id %}"
+             class="px-3 py-1 rounded text-white {% if resident.is_active %}bg-red-500{% else %}bg-green-500{% endif %}">
+             {% if resident.is_active %}Deactivate{% else %}Activate{% endif %}
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center py-4">No residents found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

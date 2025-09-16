@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto mt-8 p-6 bg-white shadow rounded">
+  <h2 class="text-2xl font-bold mb-4">My Profile</h2>
+  <img src="{{ user.profile_image.url }}" class="w-24 h-24 rounded-full mb-4" alt="Profile Picture">
+  <p><strong>Username:</strong> {{ user.username }}</p>
+  <p><strong>Email:</strong> {{ user.email }}</p>
+  <p><strong>Phone:</strong> {{ user.phone }}</p>
+  <p><strong>Apartment:</strong> {{ user.apartment_number }}</p>
+  <a href="{% url 'users:edit_profile' %}" class="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block">Edit Profile</a>
+</div>
+{% endblock %}
