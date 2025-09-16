@@ -1,5 +1,7 @@
 # storage/models.py
 from django.db import models
+from django.conf import settings
+from .models import StorageUnit
 
 class StorageUnit(models.Model):
     STATUS_CHOICES = [
@@ -15,3 +17,18 @@ class StorageUnit(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
+
+class StorageRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+    ]
+
+    resident = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.resident.username} → {self.unit.name} ({self.status})"

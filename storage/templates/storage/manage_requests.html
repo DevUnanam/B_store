@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">Manage Storage Requests</h1>
+
+  <table class="min-w-full bg-white shadow rounded">
+    <thead>
+      <tr class="bg-gray-200 text-gray-700">
+        <th class="px-4 py-2">Resident</th>
+        <th class="px-4 py-2">Unit</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in requests %}
+      <tr class="border-b">
+        <td class="px-4 py-2">{{ req.resident.username }}</td>
+        <td class="px-4 py-2">{{ req.unit.name }}</td>
+        <td class="px-4 py-2">
+          <span class="px-2 py-1 rounded text-sm
+            {% if req.status == 'pending' %} bg-yellow-200 text-yellow-800
+            {% elif req.status == 'approved' %} bg-green-200 text-green-800
+            {% else %} bg-red-200 text-red-800
+            {% endif %}
+          ">
+            {{ req.get_status_display }}
+          </span>
+        </td>
+        <td class="px-4 py-2 space-x-2">
+          {% if req.status == "pending" %}
+            <a href="{% url 'approve_request' req.pk %}"
+               class="text-green-600 hover:underline">Approve</a>
+            <a href="{% url 'reject_request' req.pk %}"
+               class="text-red-600 hover:underline">Reject</a>
+          {% else %}
+            <span class="text-gray-500">No actions</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center py-4 text-gray-500">No requests found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
