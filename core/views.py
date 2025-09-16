@@ -7,7 +7,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.shortcuts import redirect
-from users.models import CustomUser, Resident
+from users.models import CustomUser
+from core.models import Resident
 
 def is_admin(user):
     return user.is_authenticated and user.role == "admin"

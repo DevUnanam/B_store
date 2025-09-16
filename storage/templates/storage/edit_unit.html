@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto p-6 max-w-lg">
+  <h1 class="text-2xl font-bold mb-4">Edit Storage Unit: {{ unit.name }}</h1>
+
+  <form method="POST" class="space-y-4 bg-white shadow p-6 rounded">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div class="flex justify-between">
+      <a href="{% url 'storage_admin_dashboard' %}"
+         class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">
+        Back
+      </a>
+      <button type="submit"
+              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Update
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

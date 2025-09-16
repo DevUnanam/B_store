@@ -29,8 +29,10 @@ def login_view(request):
             login(request, user)
             return redirect("dashboard")
         else:
-            form = CustomLoginForm()
-            return render(request, "users/login.html", {"form": form})
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = CustomLoginForm()
+    return render(request, "users/login.html", {"form": form})
 
 def logout_view(request):
     logout(request)
@@ -75,3 +77,4 @@ def toggle_resident_status(request, user_id):
     resident.is_active = not resident.is_active  # Toggle active status
     resident.save()
     return redirect("users:resident_list")
+

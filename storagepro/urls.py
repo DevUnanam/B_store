@@ -23,5 +23,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("dashboard/", dashboard, name="dashboard"),
     path("", landing_page, name="landing"),
+    path("storage/", include("storage.urls")),
+    path("core/", include("core.urls")),
 ]
 
