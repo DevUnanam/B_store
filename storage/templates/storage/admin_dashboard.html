@@ -1,17 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mx-auto p-6">
+
   <!-- Header -->
   <div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">Storage Units Dashboard</h1>
+    <h1 class="text-2xl font-bold">Admin Storage Dashboard</h1>
     <a href="{% url 'add_storage_unit' %}"
        class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
       + Add Storage Unit
     </a>
   </div>
 
-  <!-- Table -->
-  <div class="overflow-x-auto">
+  <!-- Reports -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="p-4 bg-green-100 text-green-800 rounded shadow">
+      <h3 class="font-bold">Available</h3>
+      <p class="text-xl">{{ report.available_units }}</p>
+    </div>
+    <div class="p-4 bg-red-100 text-red-800 rounded shadow">
+      <h3 class="font-bold">Occupied</h3>
+      <p class="text-xl">{{ report.occupied_units }}</p>
+    </div>
+    <div class="p-4 bg-yellow-100 text-yellow-800 rounded shadow">
+      <h3 class="font-bold">Maintenance</h3>
+      <p class="text-xl">{{ report.maintenance_units }}</p>
+    </div>
+    <div class="p-4 bg-gray-100 text-gray-800 rounded shadow">
+      <h3 class="font-bold">Total</h3>
+      <p class="text-xl">{{ report.total_units }}</p>
+    </div>
+  </div>
+
+  <!-- Storage Units Table -->
+  <h2 class="text-xl font-semibold mb-3">Storage Units</h2>
+  <div class="overflow-x-auto mb-10">
     <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
       <thead>
         <tr class="bg-gray-100 text-gray-700">
@@ -19,6 +41,7 @@
           <th class="px-4 py-2 text-left">Size</th>
           <th class="px-4 py-2 text-left">Location</th>
           <th class="px-4 py-2 text-left">Status</th>
+          <th class="px-4 py-2 text-left">Assigned To</th>
           <th class="px-4 py-2 text-left">Actions</th>
         </tr>
       </thead>
@@ -28,15 +51,13 @@
           <td class="px-4 py-2">{{ unit.name }}</td>
           <td class="px-4 py-2">{{ unit.size }}</td>
           <td class="px-4 py-2">{{ unit.location }}</td>
+          <td class="px-4 py-2">{{ unit.get_status_display }}</td>
           <td class="px-4 py-2">
-            <span class="px-2 py-1 rounded text-sm
-              {% if unit.status == 'available' %} bg-green-200 text-green-800
-              {% elif unit.status == 'occupied' %} bg-red-200 text-red-800
-              {% else %} bg-yellow-200 text-yellow-800
-              {% endif %}
-            ">
-              {{ unit.get_status_display }}
-            </span>
+            {% if unit.assigned_to %}
+              {{ unit.assigned_to.username }}
+            {% else %}
+              -
+            {% endif %}
           </td>
           <td class="px-4 py-2 space-x-2">
             <a href="{% url 'edit_storage_unit' unit.pk %}" class="text-blue-600 hover:underline">Edit</a>
@@ -49,11 +70,66 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="5" class="text-center py-4 text-gray-500">No storage units yet.</td>
+          <td colspan="6" class="text-center py-4 text-gray-500">No storage units yet.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  <!-- Requests Table -->
+  <h2 class="text-xl font-semibold mb-3">Requests</h2>
+  <div class="overflow-x-auto mb-10">
+    <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+      <thead>
+        <tr class="bg-gray-100 text-gray-700">
+          <th class="px-4 py-2 text-left">Resident</th>
+          <th class="px-4 py-2 text-left">Unit</th>
+          <th class="px-4 py-2 text-left">Status</th>
+          <th class="px-4 py-2 text-left">Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in requests %}
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-4 py-2">{{ req.resident.username }}</td>
+          <td class="px-4 py-2">{{ req.unit.name }}</td>
+          <td class="px-4 py-2">{{ req.get_status_display }}</td>
+          <td class="px-4 py-2">{{ req.created_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center py-4 text-gray-500">No requests yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Released Units Table -->
+  <h2 class="text-xl font-semibold mb-3">Released Units</h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+      <thead>
+        <tr class="bg-gray-100 text-gray-700">
+          <th class="px-4 py-2 text-left">Unit</th>
+          <th class="px-4 py-2 text-left">Released At</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for unit in released_units %}
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-4 py-2">{{ unit.name }}</td>
+          <td class="px-4 py-2">{{ unit.released_at|date:"Y-m-d H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="2" class="text-center py-4 text-gray-500">No units released yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </div>
 {% endblock %}

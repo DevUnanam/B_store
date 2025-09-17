@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">My Storage Dashboard</h1>
+
+  <!-- Current Assigned Unit -->
+  {% if current_request %}
+    <div class="p-4 bg-green-100 rounded mb-6">
+      <h2 class="text-lg font-semibold">Current Assigned Unit</h2>
+      <p><strong>{{ current_request.unit.name }}</strong> ({{ current_request.unit.size }}, {{ current_request.unit.location }})</p>
+      <a href="{% url 'release_unit' current_request.pk %}"
+         class="mt-2 inline-block bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+        Release Unit
+      </a>
+    </div>
+  {% else %}
+    <p class="text-gray-500 mb-6">You don’t have any assigned storage unit currently.</p>
+  {% endif %}
+
+  <!-- History of Requests -->
+  <h2 class="text-lg font-semibold mb-3">My Requests History</h2>
+  <table class="min-w-full bg-white shadow rounded-lg">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="px-4 py-2">Unit</th>
+        <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in history %}
+        <tr class="border-t">
+          <td class="px-4 py-2">{{ req.unit.name }}</td>
+          <td class="px-4 py-2">
+            <span class="px-2 py-1 rounded text-sm
+              {% if req.status == 'approved' %} bg-green-200 text-green-800
+              {% elif req.status == 'pending' %} bg-yellow-200 text-yellow-800
+              {% elif req.status == 'rejected' %} bg-red-200 text-red-800
+              {% elif req.status == 'released' %} bg-gray-200 text-gray-700
+              {% endif %}
+            ">
+              {{ req.get_status_display }}
+            </span>
+          </td>
+          <td class="px-4 py-2">{{ req.created_at|date:"M d, Y H:i" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="3" class="text-center py-4 text-gray-500">No requests found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

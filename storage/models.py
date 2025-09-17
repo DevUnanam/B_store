@@ -1,7 +1,7 @@
 # storage/models.py
 from django.db import models
 from django.conf import settings
-from .models import StorageUnit
+# from .models import StorageUnit
 
 class StorageUnit(models.Model):
     STATUS_CHOICES = [
@@ -14,6 +14,21 @@ class StorageUnit(models.Model):
     size = models.CharField(max_length=50)  # e.g. Small, Medium, Large
     location = models.CharField(max_length=100)  # e.g. Basement, Floor 2
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="available")
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="storage_units"
+    )
+    released_at = models.DateTimeField(blank=True, null=True)
+
+    def release(self):
+        """Mark this unit as released."""
+        self.assigned_to = None
+        self.status = "available"
+        self.released_at = timezone.now()
+        self.save()
 
     def __str__(self):
         return f"{self.name} ({self.get_status_display()})"
@@ -23,12 +38,20 @@ class StorageRequest(models.Model):
         ("pending", "Pending"),
         ("approved", "Approved"),
         ("rejected", "Rejected"),
+        ("released", "Released"),
     ]
 
     resident = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     unit = models.ForeignKey(StorageUnit, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def release(self):
+        if self.status == "approved":
+            self.status = "released"
+            self.unit.status = "available"
+            self.unit.save()
+            self.save()
 
     def __str__(self):
         return f"{self.resident.username} → {self.unit.name} ({self.status})"

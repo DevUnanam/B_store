@@ -3,6 +3,7 @@ from django.contrib import messages
 from .models import StorageUnit, StorageRequest
 from .forms import StorageUnitForm
 from users.decorators import role_required
+from django.db.models import Count
 
 @role_required(allowed_roles=["admin"])
 def storage_admin_dashboard(request):
@@ -81,7 +82,65 @@ def reject_request(request, pk):
     messages.warning(request, f"Request rejected for {req.unit.name}.")
     return redirect("manage_requests")
 
-@login_required
+@role_required(allowed_roles=["tenant"])
 def my_requests(request):
     requests = StorageRequest.objects.filter(resident=request.user).order_by("-requested_at")
     return render(request, "storage/my_requests.html", {"requests": requests})
+
+@role_required(allowed_roles=["tenant"])
+def resident_dashboard(request):
+    resident = request.user.resident_profile
+
+    # Find current active request (approved & not released)
+    current_request = StorageRequest.objects.filter(
+        resident=resident, status="approved"
+    ).first()
+
+    # All past requests
+    history = StorageRequest.objects.filter(resident=resident).order_by("-created_at")
+
+    return render(
+        request,
+        "storage/resident_dashboard.html",
+        {"current_request": current_request, "history": history},
+    )
+
+
+@role_required(allowed_roles=["tenant"])
+def release_unit(request, pk):
+    storage_request = get_object_or_404(StorageRequest, pk=pk, resident=request.user.resident_profile)
+
+    if storage_request.status == "approved":
+        storage_request.release()
+        messages.success(request, "You have successfully released the storage unit.")
+    else:
+        messages.error(request, "This unit cannot be released.")
+
+    return redirect("resident_dashboard")
+
+@role_required(allowed_roles=["admin"])
+def admin_dashboard(request):
+    # Reports
+    report = {
+        "available_units": StorageUnit.objects.filter(status="available").count(),
+        "occupied_units": StorageUnit.objects.filter(status="occupied").count(),
+        "maintenance_units": StorageUnit.objects.filter(status="maintenance").count(),
+        "total_units": StorageUnit.objects.count(),
+    }
+
+    # All storage units (with assigned resident if any)
+    units = StorageUnit.objects.select_related("assigned_to").all()
+
+    # Requests (pending + approved + rejected)
+    requests = StorageRequest.objects.select_related("resident", "unit").order_by("-created_at")
+
+    # Released units (filter by those that have a released_at timestamp)
+    released_units = StorageUnit.objects.filter(released_at__isnull=False).order_by("-released_at")
+
+    context = {
+        "report": report,
+        "units": units,
+        "requests": requests,
+        "released_units": released_units,
+    }
+    return render(request, "storage/admin_dashboard.html", context)
